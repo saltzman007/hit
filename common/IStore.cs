@@ -2,9 +2,9 @@ namespace common
 {
     public interface IStore
     {
-        void Store(object o);
-        void StoreFile(string filename);
-       // object Load(string filename);
+        void Init();
+        string WriteStoreFile(string filename);
+        byte[] ReadStoreFile(string sha1);
     }
 }
 

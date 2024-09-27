@@ -12,18 +12,22 @@ namespace store
 {
     public class Persist : IStore
     {
-
-        public void Store(object o)
+        public void Init()
         {
+            DirectoryInfo directoryInfo = Directory.CreateDirectory($"{Constant.HitFolderName}");
 
-        }
-        public object Load()
-        {
-            //if (!Fi)
-            return null;
+            File.WriteAllText($"{Constant.HitFolderName}/HEAD", "ref: refs/heads/master");
+
+            Directory.CreateDirectory($"{Constant.HitFolderName}/refs");
+            Directory.CreateDirectory($"{Constant.HitFolderName}/refs/heads");
+            Directory.CreateDirectory($"{Constant.HitFolderName}/refs/tags");
+
+            Directory.CreateDirectory($"{Constant.HitFolderName}/objects");
+    
+            Console.WriteLine($"Initialized empty Hit repository in {directoryInfo.FullName}");
         }
 
-        public void StoreFile(string filename)
+        public string WriteStoreFile(string filename)
         {
             byte[] content = File.ReadAllBytes(filename);
             byte[] blob = GetBlob(content);
@@ -33,10 +37,33 @@ namespace store
             string dirName = strSha1.Substring(0, 2);
             string blobFileName = strSha1.Substring(2);
 
-            DirectoryInfo zipPath = Directory.CreateDirectory(Path.Combine(".hit", dirName));
+            DirectoryInfo zipPath = Directory.CreateDirectory(Path.Combine(Constant.HitFolderName, Constant.ObjectFolderName, dirName));
             string zipfilename = Path.Combine(zipPath.FullName, blobFileName);
 
             WriteCompressed(content, zipfilename);
+
+            return strSha1;
+        }
+
+        public byte[] ReadStoreFile(string sha1)
+        {
+            if (sha1.Length != 40)
+                throw new ArgumentOutOfRangeException($"Länge sha1 Error {sha1}");
+
+            string compressedFileName = Path.Combine(Constant.HitFolderName, Constant.ObjectFolderName, sha1.Substring(0, 2), sha1.Substring(2));
+
+            using (FileStream compressedFileStream = File.Open(compressedFileName, FileMode.Open))
+            {
+                using (MemoryStream outstream = new MemoryStream())
+                {
+                    using (GZipStream decompressor = new GZipStream(compressedFileStream, CompressionMode.Decompress))
+                    {
+                        decompressor.CopyTo(outstream);
+                    }
+
+                    return outstream.ToArray();
+                }
+            }
         }
 
         private void WriteCompressed(byte[] content, string targegtfilename)

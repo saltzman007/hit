@@ -2,6 +2,9 @@ namespace common
 {
     public class Constant
     {
-        static string HitFolderName = ".hit";
+        public static string HitFolderName = ".hit";
+        public static string GitFolderName = ".git";
+        public static string ObjectFolderName = "objects";
+ 
     }
 }

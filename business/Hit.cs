@@ -12,36 +12,16 @@ namespace business
         public Hit(IStore store)
         {
             Store = store;
-            //Repo = (Repo)Store.Load();
-        }
-        ~Hit()
-        {
-            Store.Store(Repo);
         }
 
         static public IStore Store{get;set;}
         static Repo Repo;
+
         static public void init(string[] args)
         {
-            if(Directory.Exists(".hit"))
-                Directory.Delete(".hit", true);
-            
-            DirectoryInfo directoryInfo = Directory.CreateDirectory(".hit");
-
-            File.WriteAllText(".hit/HEAD", "ref: refs/heads/master");
-
-            Directory.CreateDirectory(".hit/refs");
-            Directory.CreateDirectory(".hit/refs/heads");
-            Directory.CreateDirectory(".hit/refs/tags");
-
-            Directory.CreateDirectory(".hit/objects");
-  
-            Console.WriteLine($"Initialized empty Hit repository in {directoryInfo.FullName}");
-
-            Repo.Branches.Add(new Branch(){Name = "master", Active = true});
-
-            Store.Store(Repo);
+            Store.Init();
         }
+
         static public void add (string[] args)
         {
             string filename = args[1];
